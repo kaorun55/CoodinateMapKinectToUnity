@@ -16,9 +16,8 @@ public class BodySourceView : MonoBehaviour
     public Camera Camera;
     Camera _Camera;
 
-    public bool IsCoodinateColor = true;
-    int SensorWidth;
-    int SensorHeight;
+    int SensorWidth = 1920;
+    int SensorHeight = 1080;
     
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
@@ -198,45 +197,27 @@ public class BodySourceView : MonoBehaviour
         var valid = joint.TrackingState != Kinect.TrackingState.NotTracked;
 
         if ( Camera != null || valid ) {
-            // Kinectのカメラ座標(Bodyの3次元位置)を2次元(ColorまたはDepth)に変換する
-            var point2 = Map( joint.Position );
+            // KinectのCamera座標系(3次元)をColor座標系(2次元)に変換する
+            var point =_CoordinateMapper.MapCameraPointToColorSpace( joint.Position );
+            var point2 = new Vector3( point.X, point.Y, 0 );
             if ( (0<= point2.x) && (point2.x < SensorWidth) && (0 <= point2.y) && (point2.y < SensorHeight) ) {
-                // スクリーンサイズで調整
+                // スクリーンサイズで調整(Kinect->Unity)
                 point2.x = point2.x * Screen.width / SensorWidth;
                 point2.y = point2.y * Screen.height / SensorHeight;
 
-                // Unityの3次元位置に変換
+                // Unityのワールド座標系(3次元)に変換
                 var colorPoint3 = _Camera.ScreenToWorldPoint( point2 );
 
+                // 座標の調整
                 // Y座標は逆、Z座標は0にする(Xもミラー状態によって逆にする必要あり)
                 colorPoint3.y *= -1;
                 colorPoint3.z = 0;
+
                 return colorPoint3;
             }
         }
 
         // 適当に返す
         return new Vector3( joint.Position.X * 10, joint.Position.Y * 10, 0 );
-    }
-
-    Vector3 Map( Kinect.CameraSpacePoint position )
-    {
-        if ( IsCoodinateColor ) {
-            // Bodyの位置をColorの座標系で変換
-            SensorWidth = 1920;
-            SensorHeight = 1080;
-
-            var point2 =_CoordinateMapper.MapCameraPointToColorSpace( position );
-            return new Vector3( point2.X, point2.Y, 0 );
-        }
-        else {
-            // Bodyの位置をDepthの座標系で変換
-            // カメラのサイズを変更してないので、うまくいかない
-            SensorWidth = 512;
-            SensorHeight = 4224;
-
-            var point2 =_CoordinateMapper.MapCameraPointToDepthSpace( position );
-            return new Vector3( point2.X, point2.Y, 0 );
-        }
     }
 }
