@@ -200,7 +200,7 @@ public class BodySourceView : MonoBehaviour
         if ( Camera != null || valid ) {
             // Kinectのカメラ座標(Bodyの3次元位置)を2次元(ColorまたはDepth)に変換する
             var point2 = Map( joint.Position );
-            if ( (0<= point2.x) && (point2.x < SensorWidth) && (0 <= point2.y) && (point2.x < SensorHeight) ) {
+            if ( (0<= point2.x) && (point2.x < SensorWidth) && (0 <= point2.y) && (point2.y < SensorHeight) ) {
                 // スクリーンサイズで調整
                 point2.x = point2.x * Screen.width / SensorWidth;
                 point2.y = point2.y * Screen.height / SensorHeight;
