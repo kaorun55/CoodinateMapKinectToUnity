@@ -200,13 +200,11 @@ public class BodySourceView : MonoBehaviour
             // KinectのCamera座標系(3次元)をColor座標系(2次元)に変換する
             var point =_CoordinateMapper.MapCameraPointToColorSpace( joint.Position );
             var point2 = new Vector3( point.X, point.Y, 0 );
-            if ( (0<= point2.x) && (point2.x < SensorWidth) && (0 <= point2.y) && (point2.y < SensorHeight) ) {
-                // スクリーンサイズで調整(Kinect->Unity)
-                point2.x = point2.x * Screen.width / SensorWidth;
-                point2.y = point2.y * Screen.height / SensorHeight;
+            if ((0 <= point2.x) && (point2.x < SensorWidth) && (0 <= point2.y) && (point2.y < SensorHeight)){
 
-                // Unityのワールド座標系(3次元)に変換
-                var colorPoint3 = _Camera.ScreenToWorldPoint( point2 );
+			//Quadの大きさに合わせてスケーリング
+			var colorPoint3 = new Vector3(point2.x * 16 / 1920, point2.y * 9 / 1080, 0);
+
 
                 // 座標の調整
                 // Y座標は逆、Z座標は0にする(Xもミラー状態によって逆にする必要あり)
